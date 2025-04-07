@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import GameTimer from './GameTimer';
 import GameControls from './GameControls';
 import WinAnimation from './WinAnimation';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Target sequence is 80117962 (the user's student ID, using first 8 digits)
 const TARGET_SEQUENCE = [8, 0, 1, 1, 7, 9, 6, 2];
@@ -51,6 +53,7 @@ const StudentIdPuzzle: React.FC = () => {
   const [gameTime, setGameTime] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
   const [draggedTile, setDraggedTile] = useState<number | null>(null);
+  const [showWinDialog, setShowWinDialog] = useState(false);
   const { toast } = useToast();
 
   // Check if current grid matches target sequence
@@ -130,7 +133,7 @@ const StudentIdPuzzle: React.FC = () => {
     
     // Check if the player won after this move
     setTimeout(() => {
-      if (checkWinCondition()) {
+      if (JSON.stringify(newGrid) === JSON.stringify(TARGET_SEQUENCE)) {
         handleWin();
       }
     }, 300);
@@ -140,6 +143,7 @@ const StudentIdPuzzle: React.FC = () => {
   const handleWin = () => {
     setGameWon(true);
     setTimerActive(false);
+    setShowWinDialog(true);
     toast({
       title: "Puzzle Solved!",
       description: `You matched your Student ID in ${moves} moves and ${formatTime(gameTime)}!`,
@@ -157,6 +161,7 @@ const StudentIdPuzzle: React.FC = () => {
     setTimerActive(false);
     setGameStarted(false);
     setDraggedTile(null);
+    setShowWinDialog(false);
   };
 
   // Format time for display (mm:ss)
@@ -221,7 +226,7 @@ const StudentIdPuzzle: React.FC = () => {
                   <div>
                     <h3 className="font-bold text-puzzle-primary">Tips</h3>
                     <ul className="list-disc list-inside space-y-2 ml-2">
-                      <li>You can only swap adjacent numbers</li>
+                      <li>You can only swap adjacent numbers (up, down, left, or right)</li>
                       <li>Numbers in the correct position will have a green border</li>
                       <li>Use the reset button to start over</li>
                     </ul>
@@ -265,6 +270,43 @@ const StudentIdPuzzle: React.FC = () => {
       </div>
 
       {gameWon && <WinAnimation />}
+
+      <Dialog open={showWinDialog} onOpenChange={setShowWinDialog}>
+        <DialogContent className="bg-puzzle-secondary border-2 border-puzzle-primary">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center text-puzzle-primary">
+              Congratulations!
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              <div className="my-4 py-3 px-4 bg-white rounded-lg">
+                <p className="text-lg font-medium text-puzzle-text mb-2">
+                  You solved the puzzle!
+                </p>
+                <p className="text-puzzle-accent font-bold mb-1">
+                  Student ID: {TARGET_SEQUENCE.join('')}
+                </p>
+                <div className="flex justify-center gap-6 mt-3">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Moves</p>
+                    <p className="text-xl font-bold text-puzzle-primary">{moves}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Time</p>
+                    <p className="text-xl font-bold text-puzzle-primary">{formatTime(gameTime)}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={resetGame}
+                className="mt-2 bg-puzzle-primary hover:bg-puzzle-accent text-white w-full"
+              >
+                Play Again
+              </Button>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
