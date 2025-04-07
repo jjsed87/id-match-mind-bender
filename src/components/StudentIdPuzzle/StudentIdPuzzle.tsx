@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -28,9 +27,19 @@ const shuffleArray = (array: number[]) => {
   return shuffled;
 };
 
-// Check if two positions are adjacent (can only move to adjacent spaces)
+// Check if two positions are adjacent (can move horizontally or vertically)
 const areAdjacent = (index1: number, index2: number) => {
-  return Math.abs(index1 - index2) === 1;
+  const gridSize = 4; // 4x2 grid for 8 tiles
+  const row1 = Math.floor(index1 / gridSize);
+  const col1 = index1 % gridSize;
+  const row2 = Math.floor(index2 / gridSize);
+  const col2 = index2 % gridSize;
+  
+  // Check if tiles are horizontally or vertically adjacent
+  const isHorizontallyAdjacent = row1 === row2 && Math.abs(col1 - col2) === 1;
+  const isVerticallyAdjacent = col1 === col2 && Math.abs(row1 - row2) === 1;
+  
+  return isHorizontallyAdjacent || isVerticallyAdjacent;
 };
 
 const StudentIdPuzzle: React.FC = () => {
