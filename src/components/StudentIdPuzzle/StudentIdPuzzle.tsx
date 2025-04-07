@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -8,10 +7,10 @@ import GameTimer from './GameTimer';
 import GameControls from './GameControls';
 import WinAnimation from './WinAnimation';
 
-// Target sequence is 80132166 (a sample student ID)
-const TARGET_SEQUENCE = [8, 0, 1, 3, 2, 1, 6, 6];
+// Target sequence is 80117962 (the user's student ID, using first 8 digits)
+const TARGET_SEQUENCE = [8, 0, 1, 1, 7, 9, 6, 2];
 
-// Initial array creation with 8 numbers (you can replace with your Student ID)
+// Initial array creation with 8 numbers
 const createInitialGrid = () => {
   const numbers = [...TARGET_SEQUENCE];
   return shuffleArray(numbers);
@@ -29,7 +28,6 @@ const shuffleArray = (array: number[]) => {
 
 // Check if two positions are adjacent (can only move to adjacent spaces)
 const areAdjacent = (index1: number, index2: number) => {
-  // Determine if indices are adjacent in a 1D array
   return Math.abs(index1 - index2) === 1;
 };
 
