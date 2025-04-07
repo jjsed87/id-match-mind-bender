@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,16 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				puzzle: {
+					primary: '#6E59A5',
+					secondary: '#E5DEFF',
+					accent: '#1EAEDB',
+					text: '#221F26',
+					correct: '#4CAF50',
+					incorrect: '#F97316',
+					tile: '#9b87f5',
+					'tile-text': '#ffffff'
 				}
 			},
 			borderRadius: {
@@ -84,11 +95,27 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-light': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.7' }
+				},
+				'tile-pop': {
+					'0%': { transform: 'scale(0.95)', opacity: '0.8' },
+					'50%': { transform: 'scale(1.05)' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
+				'confetti': {
+					'0%': { transform: 'translateY(0) rotate(0)', opacity: '1' },
+					'100%': { transform: 'translateY(-100vh) rotate(720deg)', opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-light': 'pulse-light 2s infinite ease-in-out',
+				'tile-pop': 'tile-pop 0.3s ease-out',
+				'confetti': 'confetti 4s ease-out forwards'
 			}
 		}
 	},
