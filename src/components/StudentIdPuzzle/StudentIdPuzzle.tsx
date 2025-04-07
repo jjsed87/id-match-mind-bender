@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Check } from "lucide-react";
+import { RotateCcw, Check, HelpCircle } from "lucide-react";
 import PuzzleTile from './PuzzleTile';
 import GameTimer from './GameTimer';
 import GameControls from './GameControls';
 import WinAnimation from './WinAnimation';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 // Target sequence is 80117962 (the user's student ID, using first 8 digits)
 const TARGET_SEQUENCE = [8, 0, 1, 1, 7, 9, 6, 2];
@@ -39,6 +41,7 @@ const StudentIdPuzzle: React.FC = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameTime, setGameTime] = useState(0);
   const [timerActive, setTimerActive] = useState(false);
+  const [draggedTile, setDraggedTile] = useState<number | null>(null);
   const { toast } = useToast();
 
   // Check if current grid matches target sequence
@@ -69,24 +72,59 @@ const StudentIdPuzzle: React.FC = () => {
 
     // If tiles are adjacent, swap them
     if (areAdjacent(selectedTileIndex, index)) {
-      // Create a new grid with the swapped tiles
-      const newGrid = [...grid];
-      [newGrid[selectedTileIndex], newGrid[index]] = [newGrid[index], newGrid[selectedTileIndex]];
-      
-      setGrid(newGrid);
-      setSelectedTileIndex(null);
-      setMoves(moves + 1);
-      
-      // Check if the player won after this move
-      setTimeout(() => {
-        if (checkWinCondition()) {
-          handleWin();
-        }
-      }, 300);
+      swapTiles(selectedTileIndex, index);
     } else {
       // If tiles are not adjacent, select the new tile
       setSelectedTileIndex(index);
     }
+  };
+
+  // Handle drag start
+  const handleDragStart = (index: number) => {
+    if (gameWon) return;
+    
+    if (!gameStarted) {
+      setGameStarted(true);
+      setTimerActive(true);
+    }
+    
+    setDraggedTile(index);
+  };
+
+  // Handle drag over
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Required to allow dropping
+  };
+
+  // Handle drop
+  const handleDrop = (index: number) => {
+    if (gameWon || draggedTile === null) return;
+    
+    // If tiles are adjacent, swap them
+    if (areAdjacent(draggedTile, index)) {
+      swapTiles(draggedTile, index);
+    }
+    
+    setDraggedTile(null);
+    setSelectedTileIndex(null);
+  };
+
+  // Swap tiles helper function
+  const swapTiles = (index1: number, index2: number) => {
+    // Create a new grid with the swapped tiles
+    const newGrid = [...grid];
+    [newGrid[index1], newGrid[index2]] = [newGrid[index2], newGrid[index1]];
+    
+    setGrid(newGrid);
+    setSelectedTileIndex(null);
+    setMoves(moves + 1);
+    
+    // Check if the player won after this move
+    setTimeout(() => {
+      if (checkWinCondition()) {
+        handleWin();
+      }
+    }, 300);
   };
 
   // Handle winning the game
@@ -109,6 +147,7 @@ const StudentIdPuzzle: React.FC = () => {
     setGameTime(0);
     setTimerActive(false);
     setGameStarted(false);
+    setDraggedTile(null);
   };
 
   // Format time for display (mm:ss)
@@ -143,6 +182,46 @@ const StudentIdPuzzle: React.FC = () => {
             {TARGET_SEQUENCE.join('')}
           </span>
         </p>
+        
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="flex gap-2 items-center mb-2">
+              <HelpCircle size={16} />
+              How to Play
+            </Button>
+          </SheetTrigger>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>How to Play</SheetTitle>
+              <SheetDescription>
+                <div className="mt-4 text-left space-y-4">
+                  <div>
+                    <h3 className="font-bold text-puzzle-primary">Goal</h3>
+                    <p>Rearrange the numbers to match your Student ID: <span className="font-mono font-bold">{TARGET_SEQUENCE.join('')}</span></p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-bold text-puzzle-primary">How to Move Numbers</h3>
+                    <ul className="list-disc list-inside space-y-2 ml-2">
+                      <li>Click on a number to select it (it will highlight)</li>
+                      <li>Click on an adjacent number to swap positions</li>
+                      <li>Or drag and drop numbers to adjacent positions</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-bold text-puzzle-primary">Tips</h3>
+                    <ul className="list-disc list-inside space-y-2 ml-2">
+                      <li>You can only swap adjacent numbers</li>
+                      <li>Numbers in the correct position will have a green border</li>
+                      <li>Use the reset button to start over</li>
+                    </ul>
+                  </div>
+                </div>
+              </SheetDescription>
+            </SheetHeader>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="w-full bg-puzzle-secondary rounded-xl p-6 shadow-lg mb-6">
@@ -162,6 +241,10 @@ const StudentIdPuzzle: React.FC = () => {
               isCorrectPosition={number === TARGET_SEQUENCE[index]}
               onClick={() => handleTileClick(index)}
               gameWon={gameWon}
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(index)}
+              isDraggable={!gameWon}
             />
           ))}
         </div>
